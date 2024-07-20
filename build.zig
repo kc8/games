@@ -9,7 +9,6 @@ pub fn build(b: *std.Build) void{
         .root_source_file =  b.path("src/main.zig"),
         .optimize = optimize,
         .target = target,
-        .use_llvm = true,
     });
     exe.linkLibC();
 
@@ -27,7 +26,7 @@ pub fn build(b: *std.Build) void{
 
     b.installArtifact(exe);
 
-    const play = b.step("play", "Play the game");
+    const play = b.step("run", "run exe");
     const run = b.addRunArtifact(exe);
     run.step.dependOn(b.getInstallStep());
     play.dependOn(&run.step);

@@ -4,6 +4,7 @@ const gl = @cImport({
     @cInclude("gl3.h");
 });
 const shaders = @import("shaders.zig");
+const math = @import("math.zig");
 
 const OpenglInfo = struct {
     majorVersion: c_int,
@@ -100,13 +101,13 @@ pub fn main() !void {
     gl.glfwSwapInterval(1);
 
     // build shaders
-    const baseVs = try shaders.createShader(shaders.vs, gl.GL_VERTEX_SHADER);
-    const baseFs = try shaders.createShader(shaders.fs, gl.GL_FRAGMENT_SHADER);
+    const baseVs = try shaders.Shader.createShader(shaders.vs, gl.GL_VERTEX_SHADER);
+    const baseFs = try shaders.Shader.createShader(shaders.fs, gl.GL_FRAGMENT_SHADER);
     const programId = gl.glCreateProgram();
     gl.glAttachShader(programId, baseVs);
     gl.glAttachShader(programId, baseFs);
     gl.glLinkProgram(programId);
-    if (shaders.checkCompileLinkError(programId)) |_| {} else |err| switch (err) {
+    if (shaders.Shader.checkCompileLinkError(programId)) |_| {} else |err| switch (err) {
         else => std.debug.print("[ERROR] Failed to link program with id {d} due to error {}'\n", .{ programId, err }),
     }
     // build buffers
@@ -131,12 +132,22 @@ pub fn main() !void {
 
     openglCheckError();
 
+    const viewMatrix = math.M4.identity;
+    const projMatrix = math.M4.identity;
+    const modelMatrix = math.M4.identity;
+
     const startTime = gl.glfwGetTime();
     while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
         gl.glClearColor(0.0, 0.0, 0.0, 0.0);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT | gl.GL_STENCIL_BUFFER_BIT);
 
         gl.glUseProgram(programId);
+        const modelLoc = gl.glGetUniformLocation(programId, "model");
+        const viewLoc = gl.glGetUniformLocation(programId, "view");
+        const projLoc = gl.glGetUniformLocation(programId, "projection");
+        gl.glUniformMatrix4fv(modelLoc, 1, gl.GL_FALSE, &modelMatrix.e[0][0]);
+        gl.glUniformMatrix4fv(viewLoc, 1, gl.GL_FALSE, &viewMatrix.e[0][0]);
+        gl.glUniformMatrix4fv(projLoc, 1, gl.GL_FALSE, &projMatrix.e[0][0]);
 
         const timePassedSinceStart = gl.glfwGetTime() - startTime;
         _ = timePassedSinceStart;
@@ -147,6 +158,7 @@ pub fn main() !void {
 
         gl.glfwSwapBuffers(window);
         gl.glfwPollEvents();
+        openglCheckError();
     }
 }
 
