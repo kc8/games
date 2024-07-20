@@ -5,67 +5,7 @@ const gl = @cImport({
 });
 const shaders = @import("shaders.zig");
 const math = @import("math.zig");
-
-const OpenglInfo = struct {
-    majorVersion: c_int,
-    minorVersion: c_int,
-    vendor: [*:0]const u8,
-    renderer: [*:0]const u8,
-    version: [*:0]const u8,
-    shadingLangVer: [*:0]const u8,
-};
-
-fn getCurrentOpenGlInfo() OpenglInfo {
-    const vendor = gl.glGetString(gl.GL_VENDOR);
-    const renderer = gl.glGetString(gl.GL_RENDERER);
-    const version = gl.glGetString(gl.GL_VERSION);
-    const shadringLangVer = gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION);
-
-    var major: gl.GLint = undefined;
-    var minor: gl.GLint = undefined;
-    gl.glGetIntegerv(gl.GL_MAJOR_VERSION, &major);
-    gl.glGetIntegerv(gl.GL_MINOR_VERSION, &minor);
-    return .{ .majorVersion = major, .minorVersion = minor, .vendor = vendor, .renderer = renderer, .version = version, .shadingLangVer = shadringLangVer };
-}
-
-fn errorCallback(err: c_int, desc: [*c]const u8) callconv(.C) void {
-    std.debug.print("err num: {d} err desc: {s} '\n", .{ err, desc });
-}
-
-fn keyCallback(
-    win: ?*gl.GLFWwindow,
-    key: c_int,
-    scancode: c_int,
-    action: c_int,
-    mods: c_int,
-) callconv(.C) void {
-    _ = mods;
-    _ = scancode;
-
-    if (action == gl.GLFW_PRESS) {
-        switch (key) {
-            gl.GLFW_KEY_ESCAPE => gl.glfwSetWindowShouldClose(win, gl.GL_TRUE),
-            else => {},
-        }
-    }
-}
-
-fn frameBufferSizeCallback(
-    win: ?*gl.GLFWwindow,
-    width: c_int,
-    height: c_int,
-) callconv(.C) void {
-    _ = width;
-    _ = height;
-    _ = win;
-}
-
-fn openglCheckError() void {
-    const err = gl.glGetError();
-    if (err != gl.GL_NO_ERROR) {
-        std.debug.print("[ERROR] Opengl Error: {d}\n", .{err});
-    }
-}
+const opengl = @import("opengl.zig");
 
 pub fn main() !void {
     std.debug.print("Launching 'game time!'\n", .{});
@@ -87,11 +27,11 @@ pub fn main() !void {
     gl.glfwMakeContextCurrent(window);
 
     // opengl callbacks
-    _ = gl.glfwSetKeyCallback(window, keyCallback);
-    _ = gl.glfwSetErrorCallback(errorCallback);
-    _ = gl.glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
+    _ = gl.glfwSetKeyCallback(window, opengl.keyCallback);
+    _ = gl.glfwSetErrorCallback(opengl.errorCallback);
+    _ = gl.glfwSetFramebufferSizeCallback(window, opengl.frameBufferSizeCallback);
 
-    const openglInfo = getCurrentOpenGlInfo();
+    const openglInfo = opengl.getCurrentOpenGlInfo();
     std.debug.print("openglInfo'\n", .{});
     std.debug.print("major {}'\n", .{openglInfo.majorVersion});
     std.debug.print("minor {}'\n", .{openglInfo.minorVersion});
@@ -130,7 +70,7 @@ pub fn main() !void {
 
     defer gl.glfwTerminate();
 
-    openglCheckError();
+    opengl.openglCheckError();
 
     const viewMatrix = math.M4.identity;
     const projMatrix = math.M4.identity;
@@ -158,7 +98,7 @@ pub fn main() !void {
 
         gl.glfwSwapBuffers(window);
         gl.glfwPollEvents();
-        openglCheckError();
+        opengl.openglCheckError();
     }
 }
 
