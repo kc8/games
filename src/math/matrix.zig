@@ -1,4 +1,5 @@
 const zMath = @import("std").math;
+const VF3 = @import("vector.zig").VF3;
 const std = @import("std");
 
 pub const M4 = struct {
@@ -22,6 +23,54 @@ pub const M4 = struct {
         }
 
         _ = try writer.print("}}\n", .{});
+    }
+
+    pub fn transpose(m: *M4) M4 {
+        const result: M4= M4.identity;
+
+        for (0..3) |j| {
+            for (0..3) |i| {
+                result.e[j][i] == m.e[i][j];
+            }
+        }
+        return result;
+    }
+
+    pub fn translation(t: VF3) M4 {
+        return .{
+            .e = [4][4]f32{
+                [4]f32{1,0,0, t.x},
+                [4]f32{0,1,0, t.y},
+                [4]f32{0,0,1, t.z},
+                [4]f32{0,0,0,1}
+            },
+        };
+    }
+
+    pub fn mul(a: M4, b: M4) M4 {
+        var result : M4 = M4.identity;
+        for (0..3) |y| {
+            for (0..3) |x| {
+                result.e[y][x] = 
+                    (a.e[y][0] * b.e[0][x]) +
+                    (a.e[y][1] * b.e[1][x]) +
+                    (a.e[y][2] * b.e[2][x]) +
+                    (a.e[y][3] * b.e[3][x]);
+            }
+        }
+        return result;
+    }
+    test "mul matrix4 computes identity when against identity" {
+        const a = M4.identity;
+        const b = M4.identity;
+        const result = M4.mul(a, b);
+        const actual = M4.identity;
+        for (0..3) |i| {
+            for (0..3) |k| {
+                try std.testing.expect(result.e[i][k] == actual.e[i][k]);
+            }
+        }
+        //std.debug.print("[INFO] matrix returned with: {}\n", .{result});
     }
 };
 
@@ -60,6 +109,17 @@ pub fn orthographicProjection(aspectWdithOverHeight: f32, nearClip: f32, farClip
     return result;
 }
 
+test "orthoo graphical projection: test does not check if correct" {
+    const proj = orthographicProjection(1.0, 1.0, 2.0);
+    const inv = proj.inverse;
+    const forward = proj.forward;
+
+    //std.debug.print("[INFO] orotho inverse matrix returned with: {}\n", .{inv});
+    //std.debug.print("[INFO] orotho forward matrix returned with: {}\n", .{forward});
+    try std.testing.expect(forward.e[0][0] == 1);
+    try std.testing.expect(inv.e[0][0] == 1);
+}
+
 pub fn perspectiveProjection(aspectRatio: f32, focalLength: f32, nearClip: f32, farClip: f32) M4 {
     const ar = aspectRatio;
     const fov = focalLength; // NOTE focal length is field of view
@@ -95,17 +155,7 @@ pub fn perspectiveProjection(aspectRatio: f32, focalLength: f32, nearClip: f32, 
 
 test "perspectiveCompiles: test does not check if correct" {
     const proj = perspectiveProjection(1.0, 1.0, 2.0, 1.0);
-    std.debug.print("[INFO] projection matrix returned with: {}\n", .{proj});
+    //std.debug.print("[INFO] projection matrix returned with: {}\n", .{proj});
     try std.testing.expect(proj.e[0][0] == 114.588646);
 }
 
-test "orthoo graphical projection: test does not check if correct" {
-    const proj = orthographicProjection(1.0, 1.0, 2.0);
-    const inv = proj.inverse;
-    const forward = proj.forward;
-
-    std.debug.print("[INFO] orotho inverse matrix returned with: {}\n", .{inv});
-    std.debug.print("[INFO] orotho forward matrix returned with: {}\n", .{forward});
-    try std.testing.expect(forward.e[0][0] == 1);
-    try std.testing.expect(inv.e[0][0] == 1);
-}
