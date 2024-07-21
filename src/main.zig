@@ -53,29 +53,40 @@ pub fn main() !void {
     // build buffers
     var vao: gl.GLuint = undefined;
     var vbo: gl.GLuint = undefined;
+    var ebo: gl.GLuint = undefined;
+    std.debug.print("[INFO] befoer alloc:'\n", .{});
     gl.glGenVertexArrays(1, &vao);
     gl.glGenBuffers(1, &vbo);
+    gl.glGenBuffers(1, &ebo);
+
     gl.glBindVertexArray(vao);
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo);
-    gl.glBufferData(gl.GL_ARRAY_BUFFER, vertices.len * @sizeOf(gl.GLfloat), &vertices, gl.GL_STATIC_DRAW);
+    gl.glBufferData(gl.GL_ARRAY_BUFFER, verts.len * @sizeOf(gl.GLfloat), &verts, gl.GL_STATIC_DRAW);
 
+    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, ebo);
+    gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(u32), &indices, gl.GL_STATIC_DRAW);
+
+    std.debug.print("[INFO] alloced: '\n", .{});
     // pos cords
-    gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 5 * @sizeOf(gl.GLfloat), null);
+    //gl.glVertexAttribPointer(0, 4, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), null);
+    gl.glVertexAttribPointer(0, 4, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), null);
     gl.glEnableVertexAttribArray(0);
     // texture coord attribute
-    gl.glVertexAttribPointer(1, 2, gl.GL_FLOAT, gl.GL_FALSE, 5 * @sizeOf(gl.GLfloat), @ptrFromInt((3 * @sizeOf(gl.GLfloat))));
+    gl.glVertexAttribPointer(1, 4, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), @ptrFromInt((4 * @sizeOf(gl.GLfloat))));
     gl.glEnableVertexAttribArray(1);
+    gl.glVertexAttribPointer(2, 2, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), @ptrFromInt((8 * @sizeOf(gl.GLfloat))));
+    gl.glEnableVertexAttribArray(2);
+
     defer gl.glDeleteVertexArrays(1, vao);
     defer gl.glDeleteBuffers(1, vbo);
 
-    defer gl.glfwTerminate();
-
-    opengl.openglCheckError();
+    // defer gl.glfwTerminate(); // throwing a warning
 
     const viewMatrix = math.M4.identity;
     const projMatrix = math.M4.identity;
     const modelMatrix = math.M4.identity;
 
+    opengl.openglCheckError();
     const startTime = gl.glfwGetTime();
     while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
         gl.glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -94,7 +105,7 @@ pub fn main() !void {
         //std.debug.print("[INFO] Timed Passed: {d} '\n", .{gl.glfwGetTime() - startTime});
 
         gl.glBindVertexArray(vao);
-        gl.glDrawArrays(gl.GL_TRIANGLES, 0, 36);
+        gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_INT, null);
 
         gl.glfwSwapBuffers(window);
         gl.glfwPollEvents();
@@ -102,4 +113,22 @@ pub fn main() !void {
     }
 }
 
-const vertices = [_]gl.GLfloat{ -0.5, -0.5, -0.5, 0.0, 0.0, 0.5, -0.5, -0.5, 1.0, 0.0, 0.5, 0.5, -0.5, 1.0, 1.0, 0.5, 0.5, -0.5, 1.0, 1.0, -0.5, 0.5, -0.5, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 0.0, -0.5, -0.5, 0.5, 0.0, 0.0, 0.5, -0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 0.5, 0.5, 0.5, 1.0, 1.0, -0.5, 0.5, 0.5, 0.0, 1.0, -0.5, -0.5, 0.5, 0.0, 0.0, -0.5, 0.5, 0.5, 1.0, 0.0, -0.5, 0.5, -0.5, 1.0, 1.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, -0.5, 0.5, 0.0, 0.0, -0.5, 0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, 0.5, 0.5, -0.5, 1.0, 1.0, 0.5, -0.5, -0.5, 0.0, 1.0, 0.5, -0.5, -0.5, 0.0, 1.0, 0.5, -0.5, 0.5, 0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, -0.5, -0.5, -0.5, 0.0, 1.0, 0.5, -0.5, -0.5, 1.0, 1.0, 0.5, -0.5, 0.5, 1.0, 0.0, 0.5, -0.5, 0.5, 1.0, 0.0, -0.5, -0.5, 0.5, 0.0, 0.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, 0.5, -0.5, 0.0, 1.0, 0.5, 0.5, -0.5, 1.0, 1.0, 0.5, 0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, -0.5, 0.5, 0.5, 0.0, 0.0, -0.5, 0.5, -0.5, 0.0, 1.0 };
+const indices = [_]u32 {
+    0,1,3, 1,2,3
+};
+const verts = [_]gl.GLfloat  {
+    // positions        // colors     // texture coords
+     0.5,  0.5, 0.0, 1.0,   1.0, 1.0, 1.0, 1.0,   1.0, 1.0,   // top right
+     0.5, -0.5, 0.0, 1.0,   0.0, 1.0, 0.0, 1.0,   1.0, 0.0,   // bottom right
+    -0.5, -0.5, 0.0, 1.0,   0.0, 0.0, 1.0, 1.0,   0.0, 0.0,   // bottom left
+    -0.5,  0.5, 0.0, 1.0,   1.0, 1.0, 0.0, 1.0,   0.0, 1.0    // top left 
+};
+
+const vertsSimpl = [_]gl.GLfloat  { // todo at some point remove these
+    // positions        // colors     // texture coords
+     0.5,  0.5, 0.0,    1.0, 0.0, 0.0,    1.0, 1.0,   // top right
+     0.5, -0.5, 0.0,    0.0, 1.0, 0.0,    1.0, 0.0,   // bottom right
+    -0.5, -0.5, 0.0,    0.0, 0.0, 1.0,    0.0, 0.0,   // bottom left
+    -0.5,  0.5, 0.0,    1.0, 1.0, 0.0,    0.0, 1.0    // top left 
+};
+

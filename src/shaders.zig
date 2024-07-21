@@ -6,16 +6,19 @@ const std = @import("std");
 
 pub const vs: []const u8 =
     \\#version 330 core
-    \\layout (location = 0) in vec3 aPos;
-    \\layout (location = 1) in vec2 aTexCoord;
+    \\layout (location = 0) in vec4 aPos;
+    \\layout (location = 1) in vec4 aColor;
+    \\layout (location = 2) in vec2 aTexCoord;
     \\out vec2 TexCoord;
+    \\out vec4 VColor;
     \\uniform mat4 model;
     \\uniform mat4 view;
     \\uniform mat4 projection;
     \\void main()
     \\{
-    \\        gl_Position = projection * view * model * vec4(aPos, 1.0f);
+    \\        gl_Position = projection * view * model * aPos;
     \\        TexCoord = vec2(aTexCoord.x, aTexCoord.y);
+    \\        VColor = aColor;
     \\        //gl_Position = vec4(aPos, 1.0f); //test pos
     \\}
 ;
@@ -24,11 +27,12 @@ pub const fs: []const u8 =
     \\#version 330 core
     \\out vec4 FragColor;
     \\  
-    \\in vec4 vertexColor; // the input variable from the vertex shader (same name and same type)  
+    \\in vec4 VColor; 
+    \\in vec2 TexCord; 
     \\void main()
     \\{
-    \\    //FragColor = vertexColor;
-    \\    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    \\    FragColor = VColor;
+    \\    //FragColor = vec4(VColor, 1.0f);
     \\} 
 ;
 
@@ -57,8 +61,9 @@ pub const Shader = struct {
         var gpa = std.heap.GeneralPurposeAllocator(.{}){};
         const alloc = gpa.allocator();
         if (alloc.alloc([]u8, @intCast(errorSize))) |msg| {
-            gl.glGetShaderInfoLog(shaderId, errorSize, &errorSize, @ptrCast(msg));
-            std.debug.print("[ERROR] Shader program comppile error {s}'\n", .{msg});
+            const msgPtr: [*c]gl.GLchar = @ptrCast(msg);
+            gl.glGetShaderInfoLog(shaderId, errorSize, &errorSize, msgPtr);
+            std.debug.print("[ERROR] Shader program compile error {s}'\n", .{msg});
         } else |err| switch (err) {
             error.OutOfMemory => return ShaderInfoError.DebugAllocOOM,
         }
