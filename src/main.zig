@@ -6,6 +6,7 @@ const gl = @cImport({
 const shaders = @import("shaders.zig");
 const M4 = @import("math/matrix.zig").M4;
 const opengl = @import("opengl.zig");
+const camera = @import("camera.zig");
 
 pub fn main() !void {
     std.debug.print("Launching 'game time!'\n", .{});
@@ -82,8 +83,12 @@ pub fn main() !void {
     // defer gl.glfwTerminate(); // throwing a warning
 
     const viewMatrix = M4.identity;
+    _ = viewMatrix;
     const projMatrix = M4.identity;
     const modelMatrix = M4.identity;
+
+    const floatingCamera = camera.Camera.createDefaultCamera();
+    const view = floatingCamera.lookAt.forward;
 
     opengl.openglCheckError();
     const startTime = gl.glfwGetTime();
@@ -96,7 +101,7 @@ pub fn main() !void {
         const viewLoc = gl.glGetUniformLocation(programId, "view");
         const projLoc = gl.glGetUniformLocation(programId, "projection");
         gl.glUniformMatrix4fv(modelLoc, 1, gl.GL_FALSE, &modelMatrix.e[0][0]);
-        gl.glUniformMatrix4fv(viewLoc, 1, gl.GL_FALSE, &viewMatrix.e[0][0]);
+        gl.glUniformMatrix4fv(viewLoc, 1, gl.GL_FALSE, &view.e[0][0]);
         gl.glUniformMatrix4fv(projLoc, 1, gl.GL_FALSE, &projMatrix.e[0][0]);
 
         const timePassedSinceStart = gl.glfwGetTime() - startTime;

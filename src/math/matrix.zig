@@ -25,12 +25,12 @@ pub const M4 = struct {
         _ = try writer.print("}}\n", .{});
     }
 
-    pub fn transpose(m: *M4) M4 {
-        const result: M4= M4.identity;
+    pub fn transpose(m: M4) M4 {
+        var result: M4= M4.identity;
 
         for (0..3) |j| {
             for (0..3) |i| {
-                result.e[j][i] == m.e[i][j];
+                result.e[j][i] = m.e[i][j];
             }
         }
         return result;

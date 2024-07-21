@@ -14,7 +14,7 @@ pub const VF4 = struct {
         };
     }
 
-    pub fn createZerod() VF4 {
+    pub fn createZeroed() VF4 {
         return VF4.create(0.0, 0.0, 0.0, 0.0);
     }
 };
@@ -32,7 +32,7 @@ pub const VF3 = struct {
         };
     }
 
-    pub fn createZerod() VF3 {
+    pub fn createZeroed() VF3 {
         return VF3.create(0.0, 0.0, 0.0);
     }
 
