@@ -87,11 +87,17 @@ pub fn main() !void {
     const projMatrix = M4.identity;
     const modelMatrix = M4.identity;
 
-    const floatingCamera = camera.Camera.createDefaultCamera();
+    var floatingCamera = camera.Camera.createDefaultCamera();
+    floatingCamera.pitchRotate = M4.xRotate(floatingCamera.pitch);
+    floatingCamera.yawRotate = M4.xRotate(floatingCamera.yaw);
+    floatingCamera.rollRotate = M4.xRotate(floatingCamera.roll);
+    floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
+
     const view = floatingCamera.lookAt.forward;
 
     opengl.openglCheckError();
     const startTime = gl.glfwGetTime();
+    std.debug.print("[INFO] matrix view looks like: {}\n", .{view});
     while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
         gl.glClearColor(0.0, 0.0, 0.0, 0.0);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT | gl.GL_STENCIL_BUFFER_BIT);

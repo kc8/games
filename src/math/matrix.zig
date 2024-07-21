@@ -42,7 +42,7 @@ pub const M4 = struct {
                 [4]f32{1,0,0, t.x},
                 [4]f32{0,1,0, t.y},
                 [4]f32{0,0,1, t.z},
-                [4]f32{0,0,0,1}
+                [4]f32{0,0,0,1},
             },
         };
     }
@@ -71,6 +71,44 @@ pub const M4 = struct {
             }
         }
         //std.debug.print("[INFO] matrix returned with: {}\n", .{result});
+    }
+
+    pub fn xRotate(a: f32) M4 {
+        const c = @cos(a);
+        const s = @sin(a);
+        return .{
+            .e = [4][4]f32{
+                [4]f32{1,0,0, 0},
+                [4]f32{0,c, -s, 0},
+                [4]f32{0,s, c, 0},
+                [4]f32{0,0,0,1}
+            },
+        };
+    }
+
+    pub fn yRotate(a :f32 ) M4 {
+        const c = @cos(a);
+        const s = @sin(a);
+        return .{
+            .e = [4][4]f32{
+                [4]f32{c,0,s, 0},
+                [4]f32{0,1, 0, 0},
+                [4]f32{-s,0, c, 0},
+                [4]f32{0,0,0,1}
+            },
+        };
+    }
+    pub fn zRotate(a: f32) M4 {
+        const c = @cos(a);
+        const s = @sin(a);
+        return .{
+            .e = [4][4]f32{
+                [4]f32{c,-s,0, 0},
+                [4]f32{s,c, 0, 0},
+                [4]f32{0,0, 1, 0},
+                [4]f32{0,0,0,1}
+            },
+        };
     }
 };
 

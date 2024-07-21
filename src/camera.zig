@@ -52,33 +52,32 @@ pub const Camera = struct {
         c.forward = computeCameraForward(c.worldEyePos, c.target);
         c.left = computeCameraLeft(c.up, c.forward);
         c.up = computeCameraUp(c.forward, c.left);
-        c.lookAt = ComputeCameraLookAt(
-            c.worldEyePos, 
-            c.pitchRotate, 
-            c.yawRotate,
-            c.rollRotate,
-            c.up, 
-            c.forward, 
-            c.left);
+        c.lookAt = computeCameraLookAt(c);
         return c;
     }
 };
 
-fn computeCameraForward(cameraEyePos: VF3, cameraTarget: VF3) VF3 {
+pub fn computeCameraForward(cameraEyePos: VF3, cameraTarget: VF3) VF3 {
     return VF3.normalize(VF3.sub(cameraEyePos, cameraTarget));
 }
 
-fn computeCameraLeft(up: VF3, forward: VF3) VF3 {
+pub fn computeCameraLeft(up: VF3, forward: VF3) VF3 {
     return VF3.normalize(VF3.cross(up, forward));
 }
 
-fn computeCameraUp(forward: VF3, left: VF3) VF3 {
+pub fn computeCameraUp(forward: VF3, left: VF3) VF3 {
     return VF3.cross(forward, left);
 }
 
-fn ComputeCameraLookAt(eye: VF3, pitchRotate: M4, 
-    yawRotate: M4, rollRotate: M4, up: VF3, 
-    forward: VF3, left: VF3) M4INV {
+// note: dont mutate the camera.... return new mat
+pub fn computeCameraLookAt(c: Camera) M4INV {
+    const eye = c.worldEyePos;
+    const pitchRotate = c.pitchRotate;
+    const yawRotate = c.yawRotate;
+    const rollRotate = c.rollRotate;
+    const up = c.up;
+    const forward = c.forward;
+    const left = c.left;
 
     const forwardMat: M4 = M4{
         .e = [4][4]f32{
