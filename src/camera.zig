@@ -2,6 +2,9 @@ const M4 = @import("math/matrix.zig").M4;
 const M4INV = @import("math/matrix.zig").M4INV;
 const VF3 = @import("math/vector.zig").VF3;
 
+const cameraSpeed = 0.05;
+const cameraMOuseSpeed = 0.0005;
+
 pub const Camera = struct {
     target: VF3,
     worldEyePos: VF3,
