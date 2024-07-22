@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Zig
-        use: mlugg/setup-zig@v1
+        uses: mlugg/setup-zig@v1
         with:
           version: 0.13.0
 
