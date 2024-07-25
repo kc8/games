@@ -26,10 +26,10 @@ pub const M4 = struct {
     }
 
     pub fn transpose(m: M4) M4 {
-        var result: M4= M4.identity;
+        var result: M4 = M4.identity;
 
-        for (0..3) |j| {
-            for (0..3) |i| {
+        for (0..4) |j| {
+            for (0..4) |i| {
                 result.e[j][i] = m.e[i][j];
             }
         }
@@ -39,19 +39,19 @@ pub const M4 = struct {
     pub fn translation(t: VF3) M4 {
         return .{
             .e = [4][4]f32{
-                [4]f32{1,0,0, t.x},
-                [4]f32{0,1,0, t.y},
-                [4]f32{0,0,1, t.z},
-                [4]f32{0,0,0,1},
+                [4]f32{ 1, 0, 0, t.x },
+                [4]f32{ 0, 1, 0, t.y },
+                [4]f32{ 0, 0, 1, t.z },
+                [4]f32{ 0, 0, 0, 1 },
             },
         };
     }
 
     pub fn mul(a: M4, b: M4) M4 {
-        var result : M4 = M4.identity;
-        for (0..3) |y| {
-            for (0..3) |x| {
-                result.e[y][x] = 
+        var result: M4 = M4.identity;
+        for (0..4) |y| {
+            for (0..4) |x| {
+                result.e[y][x] =
                     (a.e[y][0] * b.e[0][x]) +
                     (a.e[y][1] * b.e[1][x]) +
                     (a.e[y][2] * b.e[2][x]) +
@@ -65,8 +65,8 @@ pub const M4 = struct {
         const b = M4.identity;
         const result = M4.mul(a, b);
         const actual = M4.identity;
-        for (0..3) |i| {
-            for (0..3) |k| {
+        for (0..4) |i| {
+            for (0..4) |k| {
                 try std.testing.expect(result.e[i][k] == actual.e[i][k]);
             }
         }
@@ -78,23 +78,23 @@ pub const M4 = struct {
         const s = @sin(a);
         return .{
             .e = [4][4]f32{
-                [4]f32{1,0,0, 0},
-                [4]f32{0,c, -s, 0},
-                [4]f32{0,s, c, 0},
-                [4]f32{0,0,0,1}
+                [4]f32{ 1, 0, 0, 0 },
+                [4]f32{ 0, c, -s, 0 },
+                [4]f32{ 0, s, c, 0 },
+                [4]f32{ 0, 0, 0, 1 },
             },
         };
     }
 
-    pub fn yRotate(a :f32 ) M4 {
+    pub fn yRotate(a: f32) M4 {
         const c = @cos(a);
         const s = @sin(a);
         return .{
             .e = [4][4]f32{
-                [4]f32{c,0,s, 0},
-                [4]f32{0,1, 0, 0},
-                [4]f32{-s,0, c, 0},
-                [4]f32{0,0,0,1}
+                [4]f32{ c, 0, s, 0 },
+                [4]f32{ 0, 1, 0, 0 },
+                [4]f32{ -s, 0, c, 0 },
+                [4]f32{ 0, 0, 0, 1 },
             },
         };
     }
@@ -103,10 +103,10 @@ pub const M4 = struct {
         const s = @sin(a);
         return .{
             .e = [4][4]f32{
-                [4]f32{c,-s,0, 0},
-                [4]f32{s,c, 0, 0},
-                [4]f32{0,0, 1, 0},
-                [4]f32{0,0,0,1}
+                [4]f32{ c, -s, 0, 0 },
+                [4]f32{ s, c, 0, 0 },
+                [4]f32{ 0, 0, 1, 0 },
+                [4]f32{ 0, 0, 0, 1 },
             },
         };
     }
@@ -196,4 +196,3 @@ test "perspectiveCompiles: test does not check if correct" {
     //std.debug.print("[INFO] projection matrix returned with: {}\n", .{proj});
     try std.testing.expect(proj.e[0][0] == 114.588646);
 }
-

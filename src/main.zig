@@ -5,8 +5,10 @@ const gl = @cImport({
 });
 const shaders = @import("shaders.zig");
 const M4 = @import("math/matrix.zig").M4;
+const VF3 = @import("math/vector.zig").VF3;
 const opengl = @import("opengl.zig");
 const camera = @import("camera.zig");
+const GameState = @import("gamestate.zig").GameState;
 
 pub fn main() !void {
     std.debug.print("Launching 'game time!'\n", .{});
@@ -28,7 +30,7 @@ pub fn main() !void {
     gl.glfwMakeContextCurrent(window);
 
     // opengl callbacks
-    _ = gl.glfwSetKeyCallback(window, opengl.keyCallback);
+    //_ = gl.glfwSetKeyCallback(window, opengl.keyCallback);
     _ = gl.glfwSetErrorCallback(opengl.errorCallback);
     _ = gl.glfwSetFramebufferSizeCallback(window, opengl.frameBufferSizeCallback);
 
@@ -83,8 +85,7 @@ pub fn main() !void {
     // defer gl.glfwTerminate(); // throwing a warning
 
     const viewMatrix = M4.identity;
-    _ = viewMatrix;
-    const projMatrix = M4.identity;
+    var projMatrix = M4.identity;
     const modelMatrix = M4.identity;
 
     var floatingCamera = camera.Camera.createDefaultCamera();
@@ -93,21 +94,44 @@ pub fn main() !void {
     floatingCamera.rollRotate = M4.xRotate(floatingCamera.roll);
     floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
 
-    const view = floatingCamera.lookAt.forward;
+    projMatrix = floatingCamera.lookAt.forward;
 
     opengl.openglCheckError();
+    std.debug.print("[INFO] matrix view looks like: {}\n", .{projMatrix});
+
+    var gameState = GameState{
+        .isForward = undefined,
+    };
     const startTime = gl.glfwGetTime();
-    std.debug.print("[INFO] matrix view looks like: {}\n", .{view});
     while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
+        opengl.getKeyCall(&gameState, window);
+        if (gameState.isExit == true) {
+            gl.glfwSetWindowShouldClose(window, gl.GL_TRUE);
+        }
+
         gl.glClearColor(0.0, 0.0, 0.0, 0.0);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT | gl.GL_STENCIL_BUFFER_BIT);
+
+        if (gameState.isForward == true) {
+            const forwardMovement = VF3.mul(floatingCamera.forward, camera.cameraSpeed);
+            floatingCamera.worldEyePos = VF3.sub(floatingCamera.worldEyePos, forwardMovement);
+            std.debug.print("worldEye: {d}, {d}, {d} \n", .{ floatingCamera.worldEyePos.x, floatingCamera.worldEyePos.y, floatingCamera.worldEyePos.z });
+        }
+        if (gameState.isBackwoards == true ) {
+            const forwardMovement = VF3.mul(floatingCamera.forward, -camera.cameraSpeed);
+            floatingCamera.worldEyePos = VF3.sub(floatingCamera.worldEyePos, forwardMovement);
+            std.debug.print("worldEye: {d}, {d}, {d} \n", .{ floatingCamera.worldEyePos.x, floatingCamera.worldEyePos.y, floatingCamera.worldEyePos.z });
+        }
+        floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
+        projMatrix = floatingCamera.lookAt.forward;
+            std.debug.print("proj: {},  \n", .{projMatrix});
 
         gl.glUseProgram(programId);
         const modelLoc = gl.glGetUniformLocation(programId, "model");
         const viewLoc = gl.glGetUniformLocation(programId, "view");
         const projLoc = gl.glGetUniformLocation(programId, "projection");
         gl.glUniformMatrix4fv(modelLoc, 1, gl.GL_FALSE, &modelMatrix.e[0][0]);
-        gl.glUniformMatrix4fv(viewLoc, 1, gl.GL_FALSE, &view.e[0][0]);
+        gl.glUniformMatrix4fv(viewLoc, 1, gl.GL_FALSE, &viewMatrix.e[0][0]);
         gl.glUniformMatrix4fv(projLoc, 1, gl.GL_FALSE, &projMatrix.e[0][0]);
 
         const timePassedSinceStart = gl.glfwGetTime() - startTime;
@@ -129,7 +153,7 @@ const rectverts = [_]gl.GLfloat{
     0.5, 0.5, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, // top right
     0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, // bottom right
     -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, // bottom left
-    -0.5, 0.5,  0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, // top left
+    -0.5, 0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, // top left
 };
 
 const cubeVerts = [_]gl.GLfloat{};

@@ -48,6 +48,7 @@ pub const VF3 = struct {
                 .z = v.z * mult,
             };
         }
+
     }
     test "normilize a vf3 computes correctly" {
         const std = @import("std");
@@ -111,5 +112,13 @@ pub const VF3 = struct {
         try std.testing.expect((r.x == 0.0));
         try std.testing.expect((r.y == 0.0));
         try std.testing.expect((r.z == 0.0));
+    }
+
+    pub fn mul(v: VF3, m: f32) VF3 {
+        return .{
+            .x = v.x * m,
+            .y= v.y * m,
+            .z= v.z * m,
+        };
     }
 };
