@@ -37,10 +37,9 @@ pub const VF3 = struct {
         return VF3.create(0.0, 0.0, 0.0);
     }
 
-
-    pub fn format(v: VF3 , comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) !void {
+    pub fn format(v: VF3, comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) !void {
         try writer.writeAll("VF3[");
-        _ = try writer.print("{d}, {d}, {d}", .{v.x, v.y, v.z});
+        _ = try writer.print("{d}, {d}, {d}", .{ v.x, v.y, v.z });
         _ = try writer.writeAll("]\n");
     }
 

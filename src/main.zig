@@ -98,11 +98,11 @@ pub fn main() !void {
     viewMatrix = floatingCamera.lookAt.forward;
     const windowAspectRatio = math.ratio(800, 800);
     projMatrix = camera.computePerspectiveProjection(
-        windowAspectRatio, 
+        windowAspectRatio,
         floatingCamera.fov,
         floatingCamera.nearClip,
-        floatingCamera.farClip
-        );
+        floatingCamera.farClip,
+    );
 
     opengl.openglCheckError();
     std.debug.print("[INFO] matrix view looks like: {}\n", .{projMatrix});
@@ -124,15 +124,15 @@ pub fn main() !void {
             const movement = VF3.mulbyF32(floatingCamera.forward, -camera.cameraSpeed);
             floatingCamera.worldEyePos = VF3.add(movement, floatingCamera.worldEyePos);
         }
-        if (gameState.isBackwards == true ) {
+        if (gameState.isBackwards == true) {
             const movement = VF3.mulbyF32(floatingCamera.forward, camera.cameraSpeed);
             floatingCamera.worldEyePos = VF3.add(floatingCamera.worldEyePos, movement);
         }
-        if (gameState.isLeft == true ) {
+        if (gameState.isLeft == true) {
             const movement = VF3.mulbyF32(floatingCamera.left, camera.cameraSpeed);
             floatingCamera.worldEyePos = VF3.add(movement, floatingCamera.worldEyePos);
         }
-        if (gameState.isRight == true ) {
+        if (gameState.isRight == true) {
             const movement = VF3.mulbyF32(floatingCamera.left, -camera.cameraSpeed);
             floatingCamera.worldEyePos = VF3.add(movement, floatingCamera.worldEyePos);
         }

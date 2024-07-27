@@ -47,7 +47,7 @@ pub fn getKeyCall(gameState: *GameState, win: ?*gl.GLFWwindow) void {
         gameState.isForward = true;
     }
     if (gl.glfwGetKey(win, gl.GLFW_KEY_S) == gl.GLFW_PRESS) {
-        gameState.isBackwards= true;
+        gameState.isBackwards = true;
     }
     if (gl.glfwGetKey(win, gl.GLFW_KEY_D) == gl.GLFW_PRESS) {
         gameState.isRight = true;

@@ -116,7 +116,12 @@ pub fn computeCameraLookAt(c: Camera) M4INV {
     return result;
 }
 
-pub fn computePerspectiveProjection(aspectRatio: f32, focalLength: f32, nearClip: f32, farClip: f32) M4 {
+pub fn computePerspectiveProjection(
+    aspectRatio: f32,
+    focalLength: f32,
+    nearClip: f32,
+    farClip: f32,
+) M4 {
     const ar: f32 = aspectRatio;
     const fov: f32 = focalLength; // NOTE focal length is field of view
 

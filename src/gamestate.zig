@@ -1,6 +1,6 @@
 pub const GameState = struct {
     isExit: bool = false,
-    isForward: bool, 
+    isForward: bool,
     isBackwards: bool = false,
     isLeft: bool = false,
     isRight: bool = false,
@@ -8,5 +8,4 @@ pub const GameState = struct {
     const Self = @This();
 };
 
-pub const input = struct {
-};
+pub const input = struct {};
