@@ -6,6 +6,7 @@ const gl = @cImport({
 const shaders = @import("shaders.zig");
 const M4 = @import("math/matrix.zig").M4;
 const VF3 = @import("math/vector.zig").VF3;
+const math = @import("math/utils.zig");
 const opengl = @import("opengl.zig");
 const camera = @import("camera.zig");
 const GameState = @import("gamestate.zig").GameState;
@@ -84,7 +85,7 @@ pub fn main() !void {
 
     // defer gl.glfwTerminate(); // throwing a warning
 
-    const viewMatrix = M4.identity;
+    var viewMatrix = M4.identity;
     var projMatrix = M4.identity;
     const modelMatrix = M4.identity;
 
@@ -94,7 +95,14 @@ pub fn main() !void {
     floatingCamera.rollRotate = M4.xRotate(floatingCamera.roll);
     floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
 
-    projMatrix = floatingCamera.lookAt.forward;
+    viewMatrix = floatingCamera.lookAt.forward;
+    const windowAspectRatio = math.ratio(800, 800);
+    projMatrix = camera.computePerspectiveProjection(
+        windowAspectRatio, 
+        floatingCamera.fov,
+        floatingCamera.nearClip,
+        floatingCamera.farClip
+        );
 
     opengl.openglCheckError();
     std.debug.print("[INFO] matrix view looks like: {}\n", .{projMatrix});
@@ -113,18 +121,24 @@ pub fn main() !void {
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT | gl.GL_STENCIL_BUFFER_BIT);
 
         if (gameState.isForward == true) {
-            const forwardMovement = VF3.mul(floatingCamera.forward, camera.cameraSpeed);
-            floatingCamera.worldEyePos = VF3.sub(floatingCamera.worldEyePos, forwardMovement);
-            std.debug.print("worldEye: {d}, {d}, {d} \n", .{ floatingCamera.worldEyePos.x, floatingCamera.worldEyePos.y, floatingCamera.worldEyePos.z });
+            const movement = VF3.mulbyF32(floatingCamera.forward, -camera.cameraSpeed);
+            floatingCamera.worldEyePos = VF3.add(movement, floatingCamera.worldEyePos);
         }
-        if (gameState.isBackwoards == true ) {
-            const forwardMovement = VF3.mul(floatingCamera.forward, -camera.cameraSpeed);
-            floatingCamera.worldEyePos = VF3.sub(floatingCamera.worldEyePos, forwardMovement);
-            std.debug.print("worldEye: {d}, {d}, {d} \n", .{ floatingCamera.worldEyePos.x, floatingCamera.worldEyePos.y, floatingCamera.worldEyePos.z });
+        if (gameState.isBackwards == true ) {
+            const movement = VF3.mulbyF32(floatingCamera.forward, camera.cameraSpeed);
+            floatingCamera.worldEyePos = VF3.add(floatingCamera.worldEyePos, movement);
+        }
+        if (gameState.isLeft == true ) {
+            const movement = VF3.mulbyF32(floatingCamera.left, camera.cameraSpeed);
+            floatingCamera.worldEyePos = VF3.add(movement, floatingCamera.worldEyePos);
+        }
+        if (gameState.isRight == true ) {
+            const movement = VF3.mulbyF32(floatingCamera.left, -camera.cameraSpeed);
+            floatingCamera.worldEyePos = VF3.add(movement, floatingCamera.worldEyePos);
         }
         floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
-        projMatrix = floatingCamera.lookAt.forward;
-            std.debug.print("proj: {},  \n", .{projMatrix});
+        viewMatrix = floatingCamera.lookAt.forward;
+        std.debug.print("VIEW: {}", .{viewMatrix});
 
         gl.glUseProgram(programId);
         const modelLoc = gl.glGetUniformLocation(programId, "model");

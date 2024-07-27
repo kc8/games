@@ -1,7 +1,7 @@
 pub const GameState = struct {
     isExit: bool = false,
     isForward: bool, 
-    isBackwoards: bool = false,
+    isBackwards: bool = false,
     isLeft: bool = false,
     isRight: bool = false,
 

@@ -1,4 +1,5 @@
 const mUtils = @import("utils.zig");
+const std = @import("std");
 pub const VF4 = struct {
     x: f32,
     y: f32,
@@ -36,6 +37,13 @@ pub const VF3 = struct {
         return VF3.create(0.0, 0.0, 0.0);
     }
 
+
+    pub fn format(v: VF3 , comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) !void {
+        try writer.writeAll("VF3[");
+        _ = try writer.print("{d}, {d}, {d}", .{v.x, v.y, v.z});
+        _ = try writer.writeAll("]\n");
+    }
+
     pub fn normalize(v: VF3) VF3 {
         const mag: f32 = magnitude(v);
         if (mag == 0) {
@@ -48,10 +56,8 @@ pub const VF3 = struct {
                 .z = v.z * mult,
             };
         }
-
     }
     test "normilize a vf3 computes correctly" {
-        const std = @import("std");
         const vf3 = VF3.create(20.5, 21.1, 8.5);
         const r = VF3.normalize(vf3);
         // std.debug.print("[INFO] corrected result with {d:.10}, {d:.10}, {d:.10}\n", .{r.x, r.y, r.z});
@@ -69,12 +75,19 @@ pub const VF3 = struct {
         };
     }
 
+    pub fn add(a: VF3, b: VF3) VF3 {
+        return .{
+            .x = a.x + b.x,
+            .y = a.y + b.y,
+            .z = a.z + b.z,
+        };
+    }
+
     pub fn magnitude(v: VF3) f32 {
         const squared: f32 = inner(v, v);
         return @sqrt(squared);
     }
     test "magnitutde a vf3 computes correctly" {
-        const std = @import("std");
         const vf3 = VF3.create(20.5, 21.1, 8.5);
         const r = VF3.magnitude(vf3);
         const epsilon: f32 = 0.0001;
@@ -90,7 +103,6 @@ pub const VF3 = struct {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
     test "inner product of vf3 compuates correctly" {
-        const std = @import("std");
         const vf3 = VF3.create(20.5, 21.1, 8.5);
         const r = VF3.inner(vf3, vf3);
         //std.debug.print("[INFO] vf3 magnititude with {}\n", .{r});
@@ -105,7 +117,6 @@ pub const VF3 = struct {
         };
     }
     test "cross product of vf3 with itself is 0" {
-        const std = @import("std");
         const vf3 = VF3.create(20.5, 21.1, 8.5);
         const r = VF3.cross(vf3, vf3);
         // std.debug.print("[INFO] vf3 magnititude with {}\n", .{r});
@@ -114,11 +125,11 @@ pub const VF3 = struct {
         try std.testing.expect((r.z == 0.0));
     }
 
-    pub fn mul(v: VF3, m: f32) VF3 {
+    pub fn mulbyF32(v: VF3, m: f32) VF3 {
         return .{
             .x = v.x * m,
-            .y= v.y * m,
-            .z= v.z * m,
+            .y = v.y * m,
+            .z = v.z * m,
         };
     }
 };
