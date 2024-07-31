@@ -26,14 +26,20 @@ pub fn main() !void {
     gl.glfwWindowHint(gl.GLFW_STENCIL_BITS, 8);
     gl.glfwWindowHint(gl.GLFW_RESIZABLE, gl.GL_TRUE);
 
-    const window = gl.glfwCreateWindow(800, 800, "Game Time", null, null) orelse @panic("Could not create glfw window");
+    var gameState = GameState{
+        .isForward = undefined,
+        .windowWidth = 800,
+        .windowHeight = 800,
+    };
+
+    const window = gl.glfwCreateWindow(gameState.windowWidth, gameState.windowHeight, "Game Time", null, null) orelse @panic("Could not create glfw window");
     defer gl.glfwDestroyWindow(window);
     gl.glfwMakeContextCurrent(window);
 
-    // opengl callbacks
+    // glfw callbacks
     //_ = gl.glfwSetKeyCallback(window, opengl.keyCallback);
+    // _ = gl.glfwSetFramebufferSizeCallback(window, opengl.frameBufferSizeCallback);
     _ = gl.glfwSetErrorCallback(opengl.errorCallback);
-    _ = gl.glfwSetFramebufferSizeCallback(window, opengl.frameBufferSizeCallback);
 
     const openglInfo = opengl.getCurrentOpenGlInfo();
     std.debug.print("openglInfo'\n", .{});
@@ -41,7 +47,6 @@ pub fn main() !void {
     std.debug.print("minor {}'\n", .{openglInfo.minorVersion});
 
     gl.glEnable(gl.GL_DEPTH_TEST);
-    gl.glViewport(0, 0, 800, 800);
     gl.glfwSwapInterval(1);
 
     // build shaders
@@ -106,13 +111,10 @@ pub fn main() !void {
 
     opengl.openglCheckError();
     std.debug.print("[INFO] matrix view looks like: {}\n", .{projMatrix});
-
-    var gameState = GameState{
-        .isForward = undefined,
-    };
     const startTime = gl.glfwGetTime();
     while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
         opengl.getKeyCall(&gameState, window);
+        opengl.updateWindowFrameSize(&gameState, window);
         if (gameState.isExit == true) {
             gl.glfwSetWindowShouldClose(window, gl.GL_TRUE);
         }
@@ -157,6 +159,7 @@ pub fn main() !void {
 
         gl.glfwSwapBuffers(window);
         gl.glfwPollEvents();
+        gl.glViewport(1, 0, gameState.windowWidth, gameState.windowHeight);
         opengl.openglCheckError();
     }
 }

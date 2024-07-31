@@ -4,6 +4,8 @@ pub const GameState = struct {
     isBackwards: bool = false,
     isLeft: bool = false,
     isRight: bool = false,
+    windowHeight: i32,
+    windowWidth: i32,
 
     const Self = @This();
 };

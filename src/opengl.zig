@@ -70,14 +70,8 @@ pub fn getKeyCall(gameState: *GameState, win: ?*gl.GLFWwindow) void {
     }
 }
 
-pub fn frameBufferSizeCallback(
-    win: ?*gl.GLFWwindow,
-    width: c_int,
-    height: c_int,
-) callconv(.C) void {
-    _ = width;
-    _ = height;
-    _ = win;
+pub fn updateWindowFrameSize(gs: *GameState, win: ?*gl.GLFWwindow) void {
+    gl.glfwGetWindowSize(win, &gs.windowWidth, &gs.windowHeight);
 }
 
 pub fn openglCheckError() void {
