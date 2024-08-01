@@ -123,7 +123,7 @@ pub fn computePerspectiveProjection(
     farClip: f32,
 ) M4 {
     const ar: f32 = aspectRatio;
-    const fov: f32 = focalLength; // NOTE focal length is field of view
+    const fov: f32 = focalLength; // NOTE: focal length is field of view
 
     const n: f32 = nearClip;
     const f: f32 = farClip;
@@ -131,23 +131,18 @@ pub fn computePerspectiveProjection(
     const nearZRange: f32 = n - f;
     //Calculate Depth
     const A: f32 = (-f - n) / (nearZRange);
-    const B: f32 = (2 * n * f) / (nearZRange); //-51 was the value that seemed to work
+    const B: f32 = (2 * n * f) / (nearZRange);
 
-    // FOV calculations and how much of the area we can see
-    // Also considered zoom
     const halfFov: f32 = math.toRadians((fov / 2.0));
     const tanHalfFOV: f32 = math.tan32(halfFov);
-    //NOTE will ar change if monitor width > its height?
-    const x: f32 = (1.0 / (tanHalfFOV * ar)); // NOTE we were dividing by ar
+    const x: f32 = (1.0 / (tanHalfFOV * ar));
     const y: f32 = (1.0 / tanHalfFOV);
 
-    // NOTE I believe x/ar and y are correct here. the other functions,
-    // not so much -100.0f allows us to view the rectangle
     const result: M4 = M4{
         .e = [4][4]f32{
             [4]f32{ x, 0.0, 0.0, 0.0 },
             [4]f32{ 0.0, y, 0.0, 0.0 },
-            [4]f32{ 0.0, 0.0, A, B }, // 5.0f gives uss what we are looking for but how come we cant get it
+            [4]f32{ 0.0, 0.0, A, B },
             [4]f32{ 0.0, 0.0, 1.0, 0.0 },
         },
     };
