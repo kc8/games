@@ -10,6 +10,7 @@ const math = @import("math/utils.zig");
 const opengl = @import("opengl.zig");
 const camera = @import("camera.zig");
 const GameState = @import("gamestate.zig").GameState;
+const renderable = @import("renderable.zig");
 
 pub fn main() !void {
     std.debug.print("Launching 'game time!'\n", .{});
@@ -59,36 +60,12 @@ pub fn main() !void {
     if (shaders.Shader.checkCompileLinkError(programId)) |_| {} else |err| switch (err) {
         else => std.debug.print("[ERROR] Failed to link program with id {d} due to error {}'\n", .{ programId, err }),
     }
-    // build buffers
-    var vao: gl.GLuint = undefined;
-    var vbo: gl.GLuint = undefined;
-    var ebo: gl.GLuint = undefined;
-    std.debug.print("[INFO] befoer alloc:'\n", .{});
-    gl.glGenVertexArrays(1, &vao);
-    gl.glGenBuffers(1, &vbo);
-    gl.glGenBuffers(1, &ebo);
-
-    gl.glBindVertexArray(vao);
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo);
-    gl.glBufferData(gl.GL_ARRAY_BUFFER, rectverts.len * @sizeOf(gl.GLfloat), &rectverts, gl.GL_STATIC_DRAW);
-
-    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, ebo);
-    gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(u32), &indices, gl.GL_STATIC_DRAW);
-
-    // pos cords
-    gl.glVertexAttribPointer(0, 4, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), null);
-    gl.glEnableVertexAttribArray(0);
-    // colors
-    gl.glVertexAttribPointer(1, 4, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), @ptrFromInt((4 * @sizeOf(gl.GLfloat))));
-    gl.glEnableVertexAttribArray(1);
-    // texture coord attribute
-    gl.glVertexAttribPointer(2, 2, gl.GL_FLOAT, gl.GL_FALSE, 10 * @sizeOf(gl.GLfloat), @ptrFromInt((8 * @sizeOf(gl.GLfloat))));
-    gl.glEnableVertexAttribArray(2);
-
-    defer gl.glDeleteVertexArrays(1, vao);
-    defer gl.glDeleteBuffers(1, vbo);
-
-    // defer gl.glfwTerminate(); // throwing a warning
+    const rect = renderable.RenderProperties{
+        .programId = programId,
+        .elementRenderCount = renderable.getRectRenderCount(),
+        .openGlProps = renderable.generateOpenglRect(),
+    };
+    defer rect.openGlProps.deferMe();
 
     var viewMatrix = M4.identity;
     var projMatrix = M4.identity;
@@ -140,7 +117,7 @@ pub fn main() !void {
         }
         floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
         viewMatrix = floatingCamera.lookAt.forward;
-        std.debug.print("VIEW: {}", .{viewMatrix});
+        //std.debug.print("VIEW: {}", .{viewMatrix});
 
         gl.glUseProgram(programId);
         const modelLoc = gl.glGetUniformLocation(programId, "model");
@@ -154,8 +131,11 @@ pub fn main() !void {
         _ = timePassedSinceStart;
         //std.debug.print("[INFO] Timed Passed: {d} '\n", .{gl.glfwGetTime() - startTime});
 
-        gl.glBindVertexArray(vao);
-        gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_INT, null);
+        //gl.glBindVertexArray(vao);
+        gl.glBindVertexArray(rect.openGlProps.vao);
+        // TODO is this an issue if our c_int from our u32 wraps around?
+        const renderCount: c_int = @intCast(rect.elementRenderCount);
+        gl.glDrawElements(gl.GL_TRIANGLES, renderCount, gl.GL_UNSIGNED_INT, null);
 
         gl.glfwSwapBuffers(window);
         gl.glfwPollEvents();
@@ -163,14 +143,3 @@ pub fn main() !void {
         opengl.openglCheckError();
     }
 }
-
-const indices = [_]u32{ 0, 1, 3, 1, 2, 3 };
-const rectverts = [_]gl.GLfloat{
-    // positions        // colors     // texture coords
-    0.5, 0.5, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, // top right
-    0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, // bottom right
-    -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, // bottom left
-    -0.5, 0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, // top left
-};
-
-const cubeVerts = [_]gl.GLfloat{};
