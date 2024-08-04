@@ -37,9 +37,6 @@ pub fn main() !void {
     defer gl.glfwDestroyWindow(window);
     gl.glfwMakeContextCurrent(window);
 
-    // glfw callbacks
-    //_ = gl.glfwSetKeyCallback(window, opengl.keyCallback);
-    // _ = gl.glfwSetFramebufferSizeCallback(window, opengl.frameBufferSizeCallback);
     _ = gl.glfwSetErrorCallback(opengl.errorCallback);
 
     const openglInfo = opengl.getCurrentOpenGlInfo();
@@ -67,6 +64,13 @@ pub fn main() !void {
     };
     defer rect.openGlProps.deferMe();
 
+    const cube = renderable.RenderProperties{
+        .programId = programId,
+        .elementRenderCount = renderable.getCubeRenderCount(),
+        .openGlProps = renderable.generateOpenglCube(),
+    };
+    defer cube.openGlProps.deferMe();
+
     var viewMatrix = M4.identity;
     var projMatrix = M4.identity;
     const modelMatrix = M4.identity;
@@ -87,7 +91,6 @@ pub fn main() !void {
     );
 
     opengl.openglCheckError();
-    std.debug.print("[INFO] matrix view looks like: {}\n", .{projMatrix});
     const startTime = gl.glfwGetTime();
     while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
         opengl.getKeyCall(&gameState, window);
@@ -117,7 +120,7 @@ pub fn main() !void {
         }
         floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
         viewMatrix = floatingCamera.lookAt.forward;
-        //std.debug.print("VIEW: {}", .{viewMatrix});
+        std.debug.print("VIEW: {}", .{viewMatrix});
 
         gl.glUseProgram(programId);
         const modelLoc = gl.glGetUniformLocation(programId, "model");
@@ -132,9 +135,10 @@ pub fn main() !void {
         //std.debug.print("[INFO] Timed Passed: {d} '\n", .{gl.glfwGetTime() - startTime});
 
         //gl.glBindVertexArray(vao);
-        gl.glBindVertexArray(rect.openGlProps.vao);
+        //gl.glBindVertexArray(rect.openGlProps.vao);
+        gl.glBindVertexArray(cube.openGlProps.vao);
         // TODO is this an issue if our c_int from our u32 wraps around?
-        const renderCount: c_int = @intCast(rect.elementRenderCount);
+        const renderCount: c_int = @intCast(cube.elementRenderCount);
         gl.glDrawElements(gl.GL_TRIANGLES, renderCount, gl.GL_UNSIGNED_INT, null);
 
         gl.glfwSwapBuffers(window);
