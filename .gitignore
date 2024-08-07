@@ -1,0 +1,4 @@
+.zig-cache/
+zig-out/*
+third_party/glfw-include/libglfw3.a
+third_party/glfw/
