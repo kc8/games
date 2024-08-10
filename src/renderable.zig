@@ -162,16 +162,16 @@ pub fn getCubeRenderCount() u32 {
 
 pub fn generateOpenglCube() RenderProperties.OpenglProps {
     var vao: gl.GLuint = undefined;
-    var vbo: gl.GLuint = undefined;
+    const vbo: gl.GLuint = undefined;
     var ebo: gl.GLuint = undefined;
 
     // We can do many buffers at once
     gl.glGenVertexArrays(1, &vao);
-    gl.glGenBuffers(1, &vbo);
+    // gl.glGenBuffers(1, &vbo);
     gl.glGenBuffers(1, &ebo);
 
     gl.glBindVertexArray(vao);
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo);
+    //gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo);
     gl.glBufferData(
         gl.GL_ARRAY_BUFFER,
         @intCast(cubeVerts.len * @sizeOf(gl.GLfloat)),

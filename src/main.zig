@@ -138,8 +138,12 @@ pub fn main() !void {
         //gl.glBindVertexArray(rect.openGlProps.vao);
         gl.glBindVertexArray(cube.openGlProps.vao);
         // TODO is this an issue if our c_int from our u32 wraps around?
-        const renderCount: c_int = @intCast(cube.elementRenderCount);
-        gl.glDrawElements(gl.GL_TRIANGLES, renderCount, gl.GL_UNSIGNED_INT, null);
+        opengl.openglRender(
+            cube.elementRenderCount,
+            cube.openGlProps.vao,
+            cube.openGlProps.ebo,
+            cube.openGlProps.vbo,
+            );
 
         gl.glfwSwapBuffers(window);
         gl.glfwPollEvents();

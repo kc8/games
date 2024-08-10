@@ -80,3 +80,17 @@ pub fn openglCheckError() void {
         std.debug.print("[ERROR] Opengl Error: {d}\n", .{err});
     }
 }
+
+pub fn openglRender(
+    renderCount: u32,
+    vaoToBind: gl.GLuint,
+    eboToBind: gl.GLuint,
+    vboToBind: gl.GLuint,
+) void {
+    _ = vboToBind;
+    const count: c_int = @intCast(renderCount);
+    gl.glBindVertexArray(vaoToBind);
+    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, eboToBind);
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 10012);
+    gl.glDrawElements(gl.GL_TRIANGLES, count, gl.GL_UNSIGNED_INT, null);
+}
