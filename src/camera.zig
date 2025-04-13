@@ -34,12 +34,12 @@ pub const Camera = struct {
 
     pub fn createDefaultCamera() Camera {
         var c: Camera = Camera{
-            .nearClip = 100.0,
+            .nearClip = 10.0,
             .pitch = 1.0,
             .yaw = 1.0,
             .roll = 1.0,
-            .farClip = 1.0,
-            .fov = 45.0,
+            .farClip = 100.0,
+            .fov = 10.0,
             .up = VF3.create(0.0, 1.0, 0.0),
             .target = VF3.create(0.0, 0.0, -1.0),
             .worldEyePos = VF3.create(0.0, 0.0, -10.0),
@@ -133,6 +133,7 @@ pub fn computePerspectiveProjection(
     const A: f32 = (-f - n) / (nearZRange);
     const B: f32 = (2 * n * f) / (nearZRange);
 
+    // todo we where getting somewhere with the fov. Does the tan func need a degree or radian?
     const halfFov: f32 = math.toRadians((fov / 2.0));
     const tanHalfFOV: f32 = math.tan32(halfFov);
     const x: f32 = (1.0 / (tanHalfFOV * ar));
@@ -143,6 +144,29 @@ pub fn computePerspectiveProjection(
             [4]f32{ x, 0.0, 0.0, 0.0 },
             [4]f32{ 0.0, y, 0.0, 0.0 },
             [4]f32{ 0.0, 0.0, A, B },
+            [4]f32{ 0.0, 0.0, 1.0, 0.0 },
+        },
+    };
+    return result;
+}
+
+pub fn computePerspectiveProjection2(
+    aspectRatio: f32,
+    fov: f32,
+    nearClip: f32,
+    farClip: f32,
+) M4 {
+    const tanHalfFov = math.tan32(math.toRadians(fov / 2.0));
+    const y: f32 = (1.0 / tanHalfFov);
+    const x: f32 = (1.0 / (aspectRatio * tanHalfFov));
+
+    const std = @import("std");
+    std.debug.print("VIEW: {} {} {} {} {}", .{ x, y, aspectRatio, tanHalfFov, fov });
+    const result: M4 = M4{
+        .e = [4][4]f32{
+            [4]f32{ x, 0.0, 0.0, 0.0 },
+            [4]f32{ 0.0, y, 0.0, 0.0 },
+            [4]f32{ 0.0, 0.0, (-nearClip - farClip) / (nearClip - farClip), (2 * farClip * nearClip) / (nearClip - farClip) },
             [4]f32{ 0.0, 0.0, 1.0, 0.0 },
         },
     };

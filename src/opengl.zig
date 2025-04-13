@@ -55,6 +55,9 @@ pub fn getKeyCall(gameState: *GameState, win: ?*gl.GLFWwindow) void {
     if (gl.glfwGetKey(win, gl.GLFW_KEY_A) == gl.GLFW_PRESS) {
         gameState.isLeft = true;
     }
+    if (gl.glfwGetKey(win, gl.GLFW_KEY_Q) == gl.GLFW_PRESS) {
+        gameState.quit = true;
+    }
     // RELEASE
     if (gl.glfwGetKey(win, gl.GLFW_KEY_W) == gl.GLFW_RELEASE) {
         gameState.isForward = false;
@@ -67,6 +70,9 @@ pub fn getKeyCall(gameState: *GameState, win: ?*gl.GLFWwindow) void {
     }
     if (gl.glfwGetKey(win, gl.GLFW_KEY_A) == gl.GLFW_RELEASE) {
         gameState.isLeft = false;
+    }
+    if (gl.glfwGetKey(win, gl.GLFW_KEY_Q) == gl.GLFW_RELEASE) {
+        gameState.quit = true;
     }
 }
 
@@ -87,10 +93,9 @@ pub fn openglRender(
     eboToBind: gl.GLuint,
     vboToBind: gl.GLuint,
 ) void {
-    _ = vboToBind;
     const count: c_int = @intCast(renderCount);
     gl.glBindVertexArray(vaoToBind);
     gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, eboToBind);
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 10012);
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vboToBind);
     gl.glDrawElements(gl.GL_TRIANGLES, count, gl.GL_UNSIGNED_INT, null);
 }

@@ -33,6 +33,7 @@ pub const fs: []const u8 =
     \\{
     \\    FragColor = VColor;
     \\    //FragColor = vec4(VColor, 1.0f);
+    \\    //FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
     \\} 
 ;
 

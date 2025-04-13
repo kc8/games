@@ -2,6 +2,7 @@ const gl = @cImport({
     @cInclude("glfw3.h");
     @cInclude("gl3.h");
 });
+const VF4 = @import("math/vector.zig").VF4;
 
 pub const RenderProperties = struct {
     elementRenderCount: u32,
@@ -103,58 +104,89 @@ pub fn generateOpenglRect() RenderProperties.OpenglProps {
 //............... OPENGL CUBE ...............................////////////
 const cubeVerts = &[_]gl.GLfloat{
     //  Positions          // Colors           // tex Coords
-    // Front
-    -0.5, -0.5,  0.5, 1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 0.0, 
-     0.5, -0.5,  0.5, 1.0,  0.0, 1.0, 0.0, 1.0,  1.0, 0.0, 
-     0.5,  0.5,  0.5, 1.0,  0.0, 0.0, 1.0, 1.0,  1.0, 1.0, 
-    -0.5,  0.5,  0.5, 1.0,  1.0, 1.0, 0.0, 1.0,  0.0, 1.0, 
-    // Back 
-    -0.5, -0.5, -0.5, 1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 0.0, 
-     0.5, -0.5, -0.5, 1.0,  0.0, 1.0, 0.0, 1.0,  1.0, 0.0, 
-     0.5,  0.5, -0.5, 1.0,  0.0, 0.0, 1.0, 1.0,  1.0, 1.0, 
-    -0.5,  0.5, -0.5, 1.0,  1.0, 1.0, 0.0, 1.0,  0.0, 1.0, 
-    // Left 
-    -0.5,  0.5,  0.5, 1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 1.0, 
-    -0.5,  0.5, -0.5, 1.0,  0.0, 1.0, 0.0, 1.0,  0.0, 1.0, 
-    -0.5, -0.5, -0.5, 1.0,  0.0, 0.0, 1.0, 1.0,  0.0, 0.0, 
-    -0.5, -0.5,  0.5, 1.0,  1.0, 1.0, 0.0, 1.0,  0.0, 0.0, 
-    // Right 
-     0.5,  0.5,  0.5, 1.0,  1.0, 0.0, 0.0, 1.0,  1.0, 1.0, 
-     0.5,  0.5, -0.5, 1.0,  0.0, 1.0, 0.0, 1.0,  1.0, 1.0, 
-     0.5, -0.5, -0.5, 1.0,  0.0, 0.0, 1.0, 1.0,  1.0, 0.0, 
-     0.5, -0.5,  0.5, 1.0,  1.0, 1.0, 0.0, 1.0,  1.0, 0.0, 
-    // Top 
-    -0.5,  0.5, -0.5, 1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 1.0, 
-     0.5,  0.5, -0.5, 1.0,  0.0, 1.0, 0.0, 1.0,  1.0, 1.0, 
-     0.5,  0.5,  0.5, 1.0,  0.0, 0.0, 1.0, 1.0,  1.0, 1.0, 
-    -0.5,  0.5,  0.5, 1.0,  1.0, 1.0, 0.0, 1.0,  0.0, 1.0, 
-    // Bottom 
-    -0.5, -0.5, -0.5, 1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 0.0, 
-     0.5, -0.5, -0.5, 1.0,  0.0, 1.0, 0.0, 1.0,  1.0, 0.0, 
-     0.5, -0.5,  0.5, 1.0,  0.0, 0.0, 1.0, 1.0,  1.0, 0.0, 
-    -0.5, -0.5,  0.5, 1.0,  1.0, 1.0, 0.0, 1.0,  0.0, 1.0, 
+
+    -1.0, -1.0, 1.0,  1.0, 1.0, 1.0, 0.0, 0.0,
+    1.0,  -1.0, 1.0,  1.0, 1.0, 1.0, 0.0, 0.0,
+    1.0,  1.0,  1.0,  1.0, 1.0, 1.0, 0.0, 0.0,
+    -1.0, 1.0,  1.0,  1.0, 1.0, 1.0, 0.0, 0.0,
+
+    -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
+    1.0,  -1.0, -1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
+    1.0,  1.0,  -1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
+    -1.0, 1.0,  -1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
 };
 
 const cubeIndices = &[_]u32{
-    // Front
-    0,  1,  2,
-    2,  3,  0,
-    // Back
-    4,  5,  6,
-    6,  7,  4,
-    // Left
-    8,  9,  10,
-    10, 11, 8,
-    // Right
-    12, 13, 14,
-    14, 15, 12,
-    // Top
-    16, 17, 18,
-    18, 19, 16,
-    // Bottom
-    20, 21, 22,
-    22, 23, 20,
+    // front
+    0, 1, 2,
+    2, 3, 0,
+    // right
+    1, 5, 6,
+    6, 2, 1,
+    // back
+    7, 6, 5,
+    5, 4, 7,
+    // left
+    4, 0, 3,
+    3, 7, 4,
+    // bottom
+    4, 5, 1,
+    1, 0, 4,
+    // top
+    3, 2, 6,
+    6, 7, 3,
 };
+
+fn generateCube(c: VF4) [64]gl.GLfloat {
+    const result = [_]gl.GLfloat{
+        //  Positions          // Colors           // tex Coords
+        // Front
+        -0.5, -0.5, 0.5,  c.x, c.y, c.z, c.w, 1.0, 0.0, 0.0,
+        0.5,  -0.5, 0.5,  1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+        0.5,  0.5,  0.5,  1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+        -0.5, 0.5,  0.5,  1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+        // Back
+        -0.5, -0.5, -0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+        0.5,  -0.5, -0.5, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+        0.5,  0.5,  -0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+        -0.5, 0.5,  -0.5, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+        // Left
+        -0.5, 0.5,  0.5,  1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
+        -0.5, 0.5,  -0.5, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+        -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+        -0.5, -0.5, 0.5,  1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+        // Right
+        0.5,  0.5,  0.5,  1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0,
+        0.5,  0.5,  -0.5, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0,
+        0.5,  -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
+        0.5,  -0.5, 0.5,  1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+        // Top
+        -0.5, 0.5,  -0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
+        0.5,  0.5,  -0.5, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0,
+        0.5,  0.5,  0.5,  1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+        -0.5, 0.5,  0.5,  1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+        // Bottom
+        -0.5, -0.5, -0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+        0.5,  -0.5, -0.5, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+        0.5,  -0.5, 0.5,  1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
+        -0.5, -0.5, 0.5,  1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+    };
+    _ = result;
+    const newCube = [_]gl.GLfloat{
+        //  Positions          // Colors           // tex Coords
+
+        -1.0, -1.0, 1.0,  0.0, 0.0, 1.0, 0.0, 0.0,
+        1.0,  -1.0, 1.0,  1.0, 1.0, 0.0, 0.0, 0.0,
+        1.0,  1.0,  1.0,  1.0, 1.0, 0.0, 0.0, 0.0,
+        -1.0, 1.0,  1.0,  0.0, 0.0, 1.0, 0.0, 0.0,
+
+        -1.0, -1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+        1.0,  -1.0, -1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+        1.0,  1.0,  -1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+        -1.0, 1.0,  -1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+    };
+    return newCube;
+}
 
 pub fn getCubeRenderCount() u32 {
     return cubeIndices.len;
@@ -162,20 +194,27 @@ pub fn getCubeRenderCount() u32 {
 
 pub fn generateOpenglCube() RenderProperties.OpenglProps {
     var vao: gl.GLuint = undefined;
-    const vbo: gl.GLuint = undefined;
+    var vbo: gl.GLuint = undefined;
     var ebo: gl.GLuint = undefined;
 
     // We can do many buffers at once
     gl.glGenVertexArrays(1, &vao);
-    // gl.glGenBuffers(1, &vbo);
+    gl.glGenBuffers(1, &vbo);
     gl.glGenBuffers(1, &ebo);
 
+    const colorCube = generateCube(.{
+        .x = 1.0,
+        .y = 1.0,
+        .z = 1.0,
+        .w = 1.0,
+    });
     gl.glBindVertexArray(vao);
-    //gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo);
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo);
     gl.glBufferData(
         gl.GL_ARRAY_BUFFER,
-        @intCast(cubeVerts.len * @sizeOf(gl.GLfloat)),
-        cubeVerts,
+        @intCast(colorCube.len * @sizeOf(gl.GLfloat)),
+        &colorCube,
+        //cubeVerts,
         gl.GL_STATIC_DRAW,
     );
 
@@ -190,20 +229,20 @@ pub fn generateOpenglCube() RenderProperties.OpenglProps {
     // pos cords
     gl.glVertexAttribPointer(
         0,
-        4,
+        3,
         gl.GL_FLOAT,
         gl.GL_FALSE,
-        10 * @sizeOf(gl.GLfloat),
+        8 * @sizeOf(gl.GLfloat),
         null,
     );
     gl.glEnableVertexAttribArray(0);
     // colors
     gl.glVertexAttribPointer(
         1,
-        4,
+        3,
         gl.GL_FLOAT,
         gl.GL_FALSE,
-        10 * @sizeOf(gl.GLfloat),
+        8 * @sizeOf(gl.GLfloat),
         @ptrFromInt((4 * @sizeOf(gl.GLfloat))),
     );
     gl.glEnableVertexAttribArray(1);
@@ -213,7 +252,7 @@ pub fn generateOpenglCube() RenderProperties.OpenglProps {
         2,
         gl.GL_FLOAT,
         gl.GL_FALSE,
-        10 * @sizeOf(gl.GLfloat),
+        8 * @sizeOf(gl.GLfloat),
         @ptrFromInt((8 * @sizeOf(gl.GLfloat))),
     );
     gl.glEnableVertexAttribArray(2);

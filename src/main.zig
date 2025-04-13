@@ -12,6 +12,8 @@ const camera = @import("camera.zig");
 const GameState = @import("gamestate.zig").GameState;
 const renderable = @import("renderable.zig");
 
+const assert = @import("std").debug.assert;
+
 pub fn main() !void {
     std.debug.print("Launching 'game time!'\n", .{});
     if (gl.glfwInit() == gl.GL_FALSE) {
@@ -29,7 +31,7 @@ pub fn main() !void {
 
     var gameState = GameState{
         .isForward = undefined,
-        .windowWidth = 800,
+        .windowWidth = 1090,
         .windowHeight = 800,
     };
 
@@ -79,11 +81,10 @@ pub fn main() !void {
     floatingCamera.pitchRotate = M4.xRotate(floatingCamera.pitch);
     floatingCamera.yawRotate = M4.xRotate(floatingCamera.yaw);
     floatingCamera.rollRotate = M4.xRotate(floatingCamera.roll);
-    floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
 
-    viewMatrix = floatingCamera.lookAt.forward;
-    const windowAspectRatio = math.ratio(800, 800);
-    projMatrix = camera.computePerspectiveProjection(
+    const windowAspectRatio = math.ratio(gameState.windowWidth, gameState.windowHeight);
+    // assert(windowAspectRatio == 1);
+    projMatrix = camera.computePerspectiveProjection2(
         windowAspectRatio,
         floatingCamera.fov,
         floatingCamera.nearClip,
@@ -92,7 +93,7 @@ pub fn main() !void {
 
     opengl.openglCheckError();
     const startTime = gl.glfwGetTime();
-    while (gl.glfwWindowShouldClose(window) == gl.GL_FALSE) {
+    while ((gl.glfwWindowShouldClose(window) == gl.GL_FALSE) or (gameState.quit == true)) {
         opengl.getKeyCall(&gameState, window);
         opengl.updateWindowFrameSize(&gameState, window);
         if (gameState.isExit == true) {
@@ -120,7 +121,7 @@ pub fn main() !void {
         }
         floatingCamera.lookAt = camera.computeCameraLookAt(floatingCamera);
         viewMatrix = floatingCamera.lookAt.forward;
-        std.debug.print("VIEW: {}", .{viewMatrix});
+        // std.debug.print("VIEW: {}", .{viewMatrix});
 
         gl.glUseProgram(programId);
         const modelLoc = gl.glGetUniformLocation(programId, "model");
@@ -134,10 +135,6 @@ pub fn main() !void {
         _ = timePassedSinceStart;
         //std.debug.print("[INFO] Timed Passed: {d} '\n", .{gl.glfwGetTime() - startTime});
 
-        //gl.glBindVertexArray(vao);
-        //gl.glBindVertexArray(rect.openGlProps.vao);
-        gl.glBindVertexArray(cube.openGlProps.vao);
-        // TODO is this an issue if our c_int from our u32 wraps around?
         opengl.openglRender(
             cube.elementRenderCount,
             cube.openGlProps.vao,

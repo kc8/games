@@ -4,6 +4,7 @@ pub const GameState = struct {
     isBackwards: bool = false,
     isLeft: bool = false,
     isRight: bool = false,
+    quit: bool = false,
     windowHeight: i32,
     windowWidth: i32,
 
